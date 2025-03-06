@@ -1,128 +1,191 @@
-# Wanderlust - Your Ultimate Travel Blog 🌍✈️
+# Wanderlust Deployment on Kubernetes
 
-WanderLust is a simple MERN travel blog website ✈ This project is aimed to help people to contribute in open source, upskill in react and also master git.
+### In this project, we will learn about how to deploy wanderlust application on Kubernetes.
 
+### Pre-requisites to implement this project:
+-  Create 2 AWS EC2 instance (Ubuntu) with instance type t2.medium and root volume 29GB.
+-  Setup <a href="https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/kubeadm.md"><u> Kubeadm </a></u>
 
-## 🎯 Goal of this project
+#
+## Steps for Kubernetes deployment:
 
-At its core, this project embodies two important aims:
+1) Become root user :
+```bash
+sudo su
+```
 
-1. **Start Your Open Source Journey**: It's aimed to kickstart your open-source journey. Here, you'll learn the basics of Git and get a solid grip on the MERN stack and I strongly believe that learning and building should go hand in hand.
-2. **React Mastery**: Once you've got the basics down, a whole new adventure begins of mastering React. This project covers everything, from simple form validation to advanced performance enhancements. And I've planned much more cool stuff to add in the near future if the project hits more number of contributors.
+#
+2) Clone code from remote repository (GitHub) :
+```bash
+git clone -b devops https://github.com/DevMadhup/wanderlust.git
+```
 
-_I'd love for you to make the most of this project - it's all about learning, helping, and growing in the open-source world._
+#
+3) Verify nodes are in ready state or not :
+```bash
+kubectl get nodes
+```
+![Alt text](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/nodes.png)
 
-## Setting up the project locally
+#
+4) Create kubernetes namespace :
+```bash
+kubectl create namespace wanderlust
+```
+![Namespace](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/namespace%20create.png)
 
-### Setting up the Backend
+#
+5) Update kubernetes config context : 
+```bash
+kubectl config set-context --current --namespace wanderlust
+```
+![Update context](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/context%20wanderlust.png)
 
-1. **Fork and Clone the Repository**
+#
+6) Enable DNS resolution on kubernetes cluster :
 
-   ```bash
-   git clone https://github.com/{your-username}/wanderlust.git
-   ```
+- Check coredns pod in kube-system namespace and you will find <i> Both coredns pods are running on master node </i>
 
-2. **Navigate to the Backend Directory**
+```bash
+kubectl get pods -n kube-system -o wide | grep -i core
+```
+![Alt text](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/get-coredns.png)
 
-   ```bash
-   cd backend
-   ```
+- Above step will run coredns pod on worker node as well for DNS resolution
 
-3. **Install Required Dependencies**
+```bash
+kubectl edit deploy coredns -n kube-system -o yaml
+```
+<i> Make replica count from 2 to 4 </i>
 
-   ```bash
-   npm i
-   ```
+![replica 4](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/edit-coredns.png)
 
-4. **Set up your MongoDB Database**
+#
+7) Navigate to frontend directory :
+```bash
+cd frontend
+```
 
-   - Open MongoDB Compass and connect MongoDB locally at `mongodb://localhost:27017`.
+#
+8) Edit .env.docker file and change the public IP Address with your worker node public IP :
+```bash
+vi .env.docker
+```
+![IP](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/frontend.env.docker.png)
 
-5. **Import sample data**
+#
+9) Build frontend docker image : 
+```bash
+docker build -t madhupdevops/frontend-wanderlust:v2.1.8 .
+```
+![Dockerfile frontend](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20frontend%20build.png)
 
-   > To populate the database with sample posts, you can copy the content from the `backend/data/sample_posts.json` file and insert it as a document in the `wanderlust/posts` collection in your local MongoDB database using either MongoDB Compass or `mongoimport`.
+#
+10) Navigate to backend directory :
+```bash
+cd ../backend/
+```
 
-   ```bash
-   mongoimport --db wanderlust --collection posts --file ./data/sample_posts.json --jsonArray
-   ```
+#
+11) Open .env.docker file and edit below variables : 
 
-6. **Configure Environment Variables**
+    - MONGODB_URI: \<your-mongodb-servicename>
+    - REDIS_URL: \<your-redis-servicename>
+    - FRONTEND_URL: \<your-workernode-publicIP>
 
-   ```bash
-   cp .env.sample .env
-   ```
+> Note: To get service names, check <u>mongodb.yaml, redis.yaml</u>
 
-7. **Start the Backend Server**
+![Backend env file](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/backend.env.docker.png)
 
-   ```bash
-   npm start
-   ```
+#
+12) Build backend docker image : 
+```bash
+docker build -t madhupdevops/backend-wanderlust:v2.1.8 .
+```
+![Backend dockerfile](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20backend%20build.png)
 
-   > You should see the following on your terminal output on successful setup.
-   >
-   > ```bash
-   > [BACKEND] Server is running on port 5000
-   > [BACKEND] Database connected: mongodb://127.0.0.1/wanderlust
-   > ```
+#
+13) Check docker images:
+```bash
+docker images
+```
+![docker images](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20images.png)
 
-### Setting up the Frontend
+#
+14) Login to DockerHub and push image to DockerHub
+```bash
+docker login
+```
+![docker login](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20login.png)
 
-1. **Open a New Terminal**
+```bash
+docker push madhupdevops/frontend-wanderlust:v2.1.8
+docker push madhupdevops/backend-wanderlust:v2.1.8
+```
 
-   ```bash
-   cd frontend
-   ```
+#
+15) Once, Image is pushed to DockerHub, navigate to kubernetes directory
+```bash
+cd ../kubernetes
+```
 
-2. **Install Dependencies**
+#
+16) Apply manifests file the below order:
 
-   ```bash
-   npm i
-   ```
-
-3. **Configure Environment Variables**
-
-   ```bash
-   cp .env.sample .env.local
-   ```
-
-4. **Launch the Development Server**
-
-   ```bash
-   npm run dev
-   ```
-
-### Setting up with Docker
-
-1.  **Ensure Docker and Docker Compose are Installed**
-    
-2.  **Clone the Repository**
-    
-   ``` bash
-    
-    git clone https://github.com/{your-username}/wanderlust.git
-   ``` 
-3.  **Navigate to the Project Directory**
-    
+    - Create persistent volume :
     ```bash
-    
-    cd wanderlust
-    
+    kubectl apply -f persistentVolume.yaml 
     ```
-4.  **Update Environment Variables**  - If you anticipate the IP address of the instance might change, update the `.env.sample` file with the new IP address.
+    ![Peristent volume](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/pv.png)
 
-5.  **Run Docker Compose**
-    
+    - Create persistent volume Claim :
     ```bash
-    
-    docker-compose up
+    kubectl apply -f persistentVolumeClaim.yaml 
     ```
-    This command will build the Docker images and start the containers for the backend and frontend, enabling you to access the Wanderlust application.
+    ![Peristent volume Claim](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/pvc.png)
 
-## 🌟 Ready to Contribute?
+    - Create MongoDB deployment and service :
+    ```bash
+    kubectl apply -f mongodb.yaml 
+    ```
+    ![MongoDb](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/mongo.png)
 
+    - Create Redis deployment and service :
+    > Note: Wait for 3-4 mins to get mongodb, redis pods and service should be up, otherwise backend-service will not connect.
+    ```bash
+    kubectl apply -f redis.yaml 
+    ```
+    ![Redis](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/redis.png)
 
-## 💖 Show Your Support
+    - Create Backend deployment and service :
+    ```bash
+    kubectl apply -f backend.yaml 
+    ```
+    ![Backend](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/backend.png)
 
-If you find this project interesting and inspiring, please consider showing your support by starring it on GitHub! Your star goes a long way in helping me reach more developers and encourages me to keep enhancing the project.
+    - Create Frontend deployment and service :
+    ```bash
+    kubectl apply -f frontend.yaml
+    ```
+    ![Frontend](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/frontend.png)
 
-🚀 Feel free to get in touch with me for any further queries or support, happy to help :)
+#
+17)  Check all deployments and services :
+```bash 
+kubectl get all
+```
+![all deployments and services](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/all-deps.png)
+
+18) Check logs for all the pods :
+> Note: This is mandatory to ensure all pods and services are connected or not, if not then recreate deployments
+```bash
+kubectl logs <pod-name>
+```
+
+20) Navigate to chrome and access your application at 31000 port :
+```bash
+http://<your-workernode-publicip>:31000/
+```
+![App](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/app.png)
+
+#
