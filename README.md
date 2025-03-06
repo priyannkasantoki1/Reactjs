@@ -39,7 +39,7 @@ kubectl create namespace wanderlust
 ```bash
 kubectl config set-context --current --namespace wanderlust
 ```
-![Update context](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/context%20wanderlust.png)
+![Update context]()
 
 #
 6) Enable DNS resolution on kubernetes cluster :
@@ -49,7 +49,7 @@ kubectl config set-context --current --namespace wanderlust
 ```bash
 kubectl get pods -n kube-system -o wide | grep -i core
 ```
-![Alt text](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/get-coredns.png)
+![Alt text]()
 
 - Above step will run coredns pod on worker node as well for DNS resolution
 
@@ -58,7 +58,7 @@ kubectl edit deploy coredns -n kube-system -o yaml
 ```
 <i> Make replica count from 2 to 4 </i>
 
-![replica 4](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/edit-coredns.png)
+![replica 4]()
 
 #
 7) Navigate to frontend directory :
@@ -71,14 +71,14 @@ cd frontend
 ```bash
 vi .env.docker
 ```
-![IP](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/frontend.env.docker.png)
+![IP]()
 
 #
 9) Build frontend docker image : 
 ```bash
 docker build -t madhupdevops/frontend-wanderlust:v2.1.8 .
 ```
-![Dockerfile frontend](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20frontend%20build.png)
+![Dockerfile frontend]()
 
 #
 10) Navigate to backend directory :
@@ -95,28 +95,28 @@ cd ../backend/
 
 > Note: To get service names, check <u>mongodb.yaml, redis.yaml</u>
 
-![Backend env file](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/backend.env.docker.png)
+![Backend env file]()
 
 #
 12) Build backend docker image : 
 ```bash
 docker build -t madhupdevops/backend-wanderlust:v2.1.8 .
 ```
-![Backend dockerfile](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20backend%20build.png)
+![Backend dockerfile]()
 
 #
 13) Check docker images:
 ```bash
 docker images
 ```
-![docker images](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20images.png)
+![docker images]()
 
 #
 14) Login to DockerHub and push image to DockerHub
 ```bash
 docker login
 ```
-![docker login](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20login.png)
+![docker login]()
 
 ```bash
 docker push madhupdevops/frontend-wanderlust:v2.1.8
@@ -136,45 +136,45 @@ cd ../kubernetes
     ```bash
     kubectl apply -f persistentVolume.yaml 
     ```
-    ![Peristent volume](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/pv.png)
+    ![Peristent volume]()
 
     - Create persistent volume Claim :
     ```bash
     kubectl apply -f persistentVolumeClaim.yaml 
     ```
-    ![Peristent volume Claim](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/pvc.png)
+    ![Peristent volume Claim]()
 
     - Create MongoDB deployment and service :
     ```bash
     kubectl apply -f mongodb.yaml 
     ```
-    ![MongoDb](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/mongo.png)
+    ![MongoDb]()
 
     - Create Redis deployment and service :
     > Note: Wait for 3-4 mins to get mongodb, redis pods and service should be up, otherwise backend-service will not connect.
     ```bash
     kubectl apply -f redis.yaml 
     ```
-    ![Redis](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/redis.png)
+    ![Redis]()
 
     - Create Backend deployment and service :
     ```bash
     kubectl apply -f backend.yaml 
     ```
-    ![Backend](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/backend.png)
+    ![Backend]()
 
     - Create Frontend deployment and service :
     ```bash
     kubectl apply -f frontend.yaml
     ```
-    ![Frontend](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/frontend.png)
+    ![Frontend]()
 
 #
 17)  Check all deployments and services :
 ```bash 
 kubectl get all
 ```
-![all deployments and services](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/all-deps.png)
+![all deployments and services]()
 
 18) Check logs for all the pods :
 > Note: This is mandatory to ensure all pods and services are connected or not, if not then recreate deployments
@@ -186,6 +186,6 @@ kubectl logs <pod-name>
 ```bash
 http://<your-workernode-publicip>:31000/
 ```
-![App](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/app.png)
+![App](https://github.com/priyannkasantoki1/Reactjs.git)
 
 #
