@@ -4,7 +4,7 @@
 
 ### Pre-requisites to implement this project:
 -  Create 2 AWS EC2 instance (Ubuntu) with instance type t2.medium and root volume 29GB.
--  Setup <a href="https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/kubeadm.md"><u> Kubeadm </a></u>
+-  Setup <a href="https://github.com/priyannkasantoki1/Reactjs"><u> Kubeadm </a></u>
 
 #
 ## Steps for Kubernetes deployment:
@@ -17,7 +17,7 @@ sudo su
 #
 2) Clone code from remote repository (GitHub) :
 ```bash
-git clone -b devops https://github.com/DevMadhup/wanderlust.git
+git clone -b devops https://github.com/priyannkasantoki1/Reactjs.git
 ```
 
 #
@@ -32,7 +32,7 @@ kubectl get nodes
 ```bash
 kubectl create namespace wanderlust
 ```
-![Namespace](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/namespace%20create.png)
+![Namespace](https://github.com/priyannkasantoki1/Reactjs.git)
 
 #
 5) Update kubernetes config context : 
