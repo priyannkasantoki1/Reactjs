@@ -26,6 +26,7 @@ git clone -b devops https://github.com/priyannkasantoki1/Reactjs.git
 kubectl get nodes
 ```
 ![Alt text](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/nodes.png)
+[Alt text](https://github.com/priyannkasantoki1/Reactjs/blob/main/project-image/IMG-20250331-WA0001.jpg)
 
 #
 4) Create kubernetes namespace :
